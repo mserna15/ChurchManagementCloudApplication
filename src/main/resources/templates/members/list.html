@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Members – CCMS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+
+        :root {
+            --navy:      #1c2b3a;
+            --navy-mid:  #2a3f54;
+            --gold:      #c8973a;
+            --gold-light:#e8b96a;
+            --cream:     #faf7f2;
+            --cream-dark:#f0ebe2;
+            --text:      #2c3340;
+            --text-muted:#6b7585;
+            --border:    #ddd8cf;
+            --success-bg:#edf7ed;
+            --success-fg:#2e6b30;
+            --error-bg:  #fdecea;
+            --error-fg:  #8b2020;
+            --radius:    8px;
+            --shadow:    0 2px 12px rgba(28,43,58,0.10);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; line-height: 1.6; }
+
+        header { background: var(--navy); padding: 0 2.5rem; display: flex; align-items: center; justify-content: space-between; height: 64px; box-shadow: 0 2px 16px rgba(0,0,0,0.25); }
+
+        .site-title { font-family: 'Cormorant Garamond', serif; font-size: 1.45rem; font-weight: 600; color: #fff; letter-spacing: 0.02em; }
+        .site-title span { color: var(--gold); }
+
+        nav { display: flex; gap: 0.25rem; }
+        nav a { font-size: 0.875rem; font-weight: 500; color: rgba(255,255,255,0.72); text-decoration: none; padding: 0.45rem 1rem; border-radius: var(--radius); transition: background 0.18s, color 0.18s; }
+        nav a:hover, nav a.active { background: rgba(255,255,255,0.10); color: #fff; }
+
+        main { max-width: 1060px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+
+        .page-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1.75rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+        .page-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 600; color: var(--navy); }
+
+        .btn { display: inline-flex; align-items: center; padding: 0.5rem 1.2rem; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 500; text-decoration: none; cursor: pointer; border: none; transition: background 0.18s, box-shadow 0.18s; }
+        .btn-gold { background: var(--gold); color: #fff; }
+        .btn-gold:hover { background: var(--gold-light); box-shadow: var(--shadow); }
+        .btn-sm { padding: 0.3rem 0.8rem; font-size: 0.8rem; }
+        .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text-muted); }
+        .btn-outline:hover { border-color: var(--navy); color: var(--navy); }
+        .btn-danger { background: transparent; border: 1.5px solid #e0bcbc; color: #a03030; }
+        .btn-danger:hover { background: var(--error-bg); border-color: #c77; }
+
+        .alert { padding: 0.85rem 1.1rem; border-radius: var(--radius); font-size: 0.9rem; margin-bottom: 1.25rem; border-left: 4px solid; }
+        .alert-success { background: var(--success-bg); color: var(--success-fg); border-color: var(--success-fg); }
+        .alert-error   { background: var(--error-bg);   color: var(--error-fg);   border-color: var(--error-fg); }
+
+        .card { background: #fff; border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; border: 1px solid var(--border); }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: var(--navy); }
+        thead th { font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.70); padding: 0.9rem 1.25rem; text-align: left; }
+        tbody tr { border-bottom: 1px solid var(--cream-dark); transition: background 0.14s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--cream); }
+        tbody td { padding: 0.9rem 1.25rem; font-size: 0.9rem; color: var(--text); vertical-align: middle; }
+
+        .actions-cell { display: flex; gap: 0.5rem; }
+        .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.95rem; }
+        .text-muted { color: var(--text-muted); }
+        .badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 99px; font-size: 0.75rem; font-weight: 500; background: var(--cream-dark); color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+<header>
+    <span class="site-title">Church <span>&amp;</span> Community</span>
+    <nav>
+        <a href="/groups">Ministry Groups</a>
+        <a href="/members" class="active">Members</a>
+    </nav>
+</header>
+
+<main>
+    <div class="page-header">
+        <h1>Members</h1>
+        <a class="btn btn-gold" href="/members/add">+ Add Member</a>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Join Date</th>
+                    <th>Ministry Group</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${#lists.isEmpty(members)}">
+                    <td colspan="7">
+                        <div class="empty-state">No members found. Add one to get started.</div>
+                    </td>
+                </tr>
+                <tr th:each="member : ${members}">
+                    <td class="text-muted" th:text="${member.id}"></td>
+                    <td th:text="${member.firstName + ' ' + member.lastName}"></td>
+                    <td class="text-muted" th:text="${member.email}"></td>
+                    <td class="text-muted" th:text="${member.phone}"></td>
+                    <td class="text-muted" th:text="${member.joinDate}"></td>
+                    <td>
+                        <span class="badge"
+                              th:text="${member.ministryGroup != null ? member.ministryGroup.groupName : 'Unassigned'}">
+                        </span>
+                    </td>
+                    <td>
+                        <div class="actions-cell">
+                            <a class="btn btn-sm btn-outline" th:href="@{/members/edit/{id}(id=${member.id})}">Edit</a>
+                            <a class="btn btn-sm btn-danger" th:href="@{/members/delete/{id}(id=${member.id})}">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+</body>
+</html>
