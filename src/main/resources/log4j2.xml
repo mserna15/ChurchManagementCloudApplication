@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+
+    <Properties>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n</Property>
+        <Property name="LOG_DIR">logs</Property>
+    </Properties>
+
+    <Appenders>
+
+        <!-- Console -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+
+        <!-- Rolling File -->
+        <RollingFile name="FileAppender"
+                     fileName="${LOG_DIR}/ccms.log"
+                     filePattern="${LOG_DIR}/ccms-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
+
+        <!-- Loggly HTTP Appender -->
+        <Http name="Loggly"
+              url="https://logs-01.loggly.com/inputs/${env:LOGGLY_TOKEN}/tag/ccms,log4j2/">
+            <Property name="Content-Type">text/plain</Property>
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Http>
+
+    </Appenders>
+
+    <Loggers>
+
+        <!-- Your application package - catches all your service/controller logs -->
+        <Logger name="com.ccms" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="FileAppender"/>
+            <AppenderRef ref="Loggly"/>
+        </Logger>
+
+        <!-- Spring framework - keep at INFO to reduce noise -->
+        <Logger name="org.springframework" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- Hibernate SQL logging - useful for debugging -->
+        <Logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="FileAppender"/>
+        </Logger>
+
+        <Root level="WARN">
+            <AppenderRef ref="Console"/>
+        </Root>
+
+    </Loggers>
+
+</Configuration>
