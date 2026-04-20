@@ -27,8 +27,11 @@
 
         <!-- Loggly HTTP Appender -->
         <Http name="Loggly"
-              url="https://logs-01.loggly.com/inputs/${env:LOGGLY_TOKEN}/tag/ccms,log4j2/">
-            <Property name="Content-Type">text/plain</Property>
+              url="http://logs-01.loggly.com/inputs/${env:LOGGLY_TOKEN}/tag/ccms,log4j2/"
+              method="POST"
+              connectTimeoutMillis="5000"
+              readTimeoutMillis="5000">
+            <Property name="Content-Type">text/plain; charset=UTF-8</Property>
             <PatternLayout pattern="${LOG_PATTERN}"/>
         </Http>
 
@@ -36,19 +39,16 @@
 
     <Loggers>
 
-        <!-- Your application package - catches all your service/controller logs -->
         <Logger name="com.ccms" level="DEBUG" additivity="false">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="FileAppender"/>
             <AppenderRef ref="Loggly"/>
         </Logger>
 
-        <!-- Spring framework - keep at INFO to reduce noise -->
         <Logger name="org.springframework" level="INFO" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
 
-        <!-- Hibernate SQL logging - useful for debugging -->
         <Logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="FileAppender"/>

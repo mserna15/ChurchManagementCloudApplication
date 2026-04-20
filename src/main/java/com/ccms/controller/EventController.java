@@ -1,5 +1,7 @@
 package com.ccms.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,17 +22,21 @@ import jakarta.validation.Valid;
 @RequestMapping("/events")
 public class EventController {
 
+    private static final Logger logger = LoggerFactory.getLogger(EventController.class);
+
     @Autowired
     private EventService eventService;
 
     @GetMapping
     public String listEvents(Model model) {
+        logger.debug("EventController.listEvents() - Request received");
         model.addAttribute("events", eventService.getAllEvents());
         return "events/list";
     }
 
     @GetMapping("/add")
     public String showAddForm(Model model) {
+        logger.debug("EventController.showAddForm() - Request received");
         model.addAttribute("event", new Event());
         return "events/form";
     }
@@ -40,19 +46,36 @@ public class EventController {
                            BindingResult result,
                            RedirectAttributes redirectAttributes,
                            Model model) {
-        if (result.hasErrors()) return "events/form";
-        eventService.saveEvent(event);
-        redirectAttributes.addFlashAttribute("successMessage", "Event added successfully.");
+        logger.debug("EventController.addEvent() - Submitting event: {}", event.getTitle());
+
+        if (result.hasErrors()) {
+            logger.warn("EventController.addEvent() - Validation errors");
+            return "events/form";
+        }
+
+        try {
+            eventService.saveEvent(event);
+            logger.info("EventController.addEvent() - Event saved successfully: {}", event.getTitle());
+            redirectAttributes.addFlashAttribute("successMessage", "Event added successfully.");
+        } catch (Exception e) {
+            logger.error("EventController.addEvent() - Unexpected error", e);
+            model.addAttribute("errorMessage", "An unexpected error occurred.");
+            return "events/form";
+        }
+
         return "redirect:/events";
     }
 
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model,
                                RedirectAttributes redirectAttributes) {
+        logger.debug("EventController.showEditForm() - id={}", id);
+
         return eventService.getEventById(id).map(event -> {
             model.addAttribute("event", event);
             return "events/form";
         }).orElseGet(() -> {
+            logger.warn("EventController.showEditForm() - Event not found id={}", id);
             redirectAttributes.addFlashAttribute("errorMessage", "Event not found.");
             return "redirect:/events";
         });
@@ -64,16 +87,39 @@ public class EventController {
                               BindingResult result,
                               RedirectAttributes redirectAttributes,
                               Model model) {
-        if (result.hasErrors()) return "events/form";
-        eventService.updateEvent(id, event);
-        redirectAttributes.addFlashAttribute("successMessage", "Event updated successfully.");
+        logger.debug("EventController.updateEvent() - id={}", id);
+
+        if (result.hasErrors()) {
+            logger.warn("EventController.updateEvent() - Validation errors for id={}", id);
+            return "events/form";
+        }
+
+        try {
+            eventService.updateEvent(id, event);
+            logger.info("EventController.updateEvent() - Event updated successfully id={}", id);
+            redirectAttributes.addFlashAttribute("successMessage", "Event updated successfully.");
+        } catch (Exception e) {
+            logger.error("EventController.updateEvent() - Unexpected error for id={}", id, e);
+            model.addAttribute("errorMessage", "An unexpected error occurred.");
+            return "events/form";
+        }
+
         return "redirect:/events";
     }
 
     @GetMapping("/delete/{id}")
     public String deleteEvent(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        eventService.deleteEvent(id);
-        redirectAttributes.addFlashAttribute("successMessage", "Event deleted successfully.");
+        logger.debug("EventController.deleteEvent() - id={}", id);
+
+        try {
+            eventService.deleteEvent(id);
+            logger.info("EventController.deleteEvent() - Event deleted successfully id={}", id);
+            redirectAttributes.addFlashAttribute("successMessage", "Event deleted successfully.");
+        } catch (Exception e) {
+            logger.error("EventController.deleteEvent() - Unexpected error for id={}", id, e);
+            redirectAttributes.addFlashAttribute("errorMessage", "An unexpected error occurred.");
+        }
+
         return "redirect:/events";
     }
 }
