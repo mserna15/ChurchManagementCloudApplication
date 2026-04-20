@@ -12,6 +12,7 @@ A Spring Boot web application for managing church members, ministry groups, even
 - [Running Locally](#running-locally)
 - [Deployment](#deployment)
 - [UptimeRobot Monitoring](#uptimerobot-monitoring)
+- [Logging](#logging)
 
 ---
 
@@ -26,6 +27,7 @@ A Spring Boot web application for managing church members, ministry groups, even
 | Database | MySQL |
 | Build Tool | Maven (wrapper included) |
 | Monitoring | Spring Boot Actuator + UptimeRobot |
+| Logging | Log4J2 + Loggly |
 
 ---
 
@@ -277,9 +279,50 @@ management.endpoint.health.show-details=never
 1. Log into [uptimerobot.com](https://uptimerobot.com)
 2. Click **Add New Monitor**
 3. Set **Monitor Type** → `HTTP(s)`
-4. Set **URL** - `https://yourdomain.com/actuator/health`
-5. Set **Monitoring Interval** - 5 minutes
+4. Set **URL** → `https://yourdomain.com/actuator/health`
+5. Set **Monitoring Interval** → 5 minutes
 6. Add an **Alert Contact** (email or SMS) to be notified on downtime
-7. Save - UptimeRobot will begin pinging immediately
+7. Save — UptimeRobot will begin pinging immediately
 
-> UptimeRobot is fully external and works by simply checking that the endpoint returns an HTTP 200 response.
+> No API keys, tokens, or code changes are needed on the app side. UptimeRobot is fully external and works by simply checking that the endpoint returns an HTTP 200 response.
+
+---
+
+## Logging
+
+The app uses **Log4J2** as the logging framework and ships logs to **Loggly** as the cloud-based log aggregation platform.
+
+### How It Works
+
+```
+App Code (controllers, services)
+  │
+  ▼
+Log4J2                  (formats and routes log events)
+  │
+  ▼
+Loggly Syslog Appender  (ships logs over the network)
+  │
+  ▼
+Loggly Dashboard        (search, filter, and monitor logs in real time)
+```
+
+### Log Levels in Use
+
+| Level | Where | Example |
+|---|---|---|
+| `INFO` | App startup | `Started CcmsApplication in 100.7 seconds` |
+| `DEBUG` | Controllers | `MemberController.listMembers() - Request received` |
+| `DEBUG` | Services | `MemberService.getAllMembers() - Fetching all members` |
+| `DEBUG` | Services | `MemberService.getAllMembers() - Found 12 members` |
+
+Logging is applied at both the **controller layer** (request received) and the **service layer** (what was fetched and what was returned), giving full traceability of a request through the stack.
+
+### Loggly Dashboard
+
+Logs are viewable in real time at [loggly.com](https://loggly.com) under the `ccms` tag. Each log event includes:
+
+- Timestamp
+- Client IP (`clientHost`)
+- Content type
+- Full log message with class and method name
