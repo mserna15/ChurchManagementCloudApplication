@@ -21,6 +21,7 @@ import com.ccms.service.MinistryGroupService;
 import jakarta.validation.Valid;
 
 @Controller
+
 @RequestMapping("/members")
 public class MemberController {
 
