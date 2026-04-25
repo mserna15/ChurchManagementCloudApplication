@@ -26,21 +26,24 @@ public class AnnouncementController {
 
     @Autowired
     private AnnouncementService announcementService;
-
+    // ── READ: List all Announcments ────────────────────────────
+    // GET /Announcement
     @GetMapping
     public String listAnnouncements(Model model) {
         logger.debug("AnnouncementController.listAnnouncements() - Request received");
         model.addAttribute("announcements", announcementService.getAllAnnouncements());
         return "announcements/list";
     }
-
+    // ── CREATE: Show form ─────────────────────────────────
+    // GET /Announcements/add
     @GetMapping("/add")
     public String showAddForm(Model model) {
         logger.debug("AnnouncementController.showAddForm() - Request received");
         model.addAttribute("announcement", new Announcement());
         return "announcements/form";
     }
-
+  // ── CREATE: Submit form ───────────────────────────────
+    // POST /Announcements/add
     @PostMapping("/add")
     public String addAnnouncement(@Valid @ModelAttribute("announcement") Announcement announcement,
                                   BindingResult result,
@@ -65,7 +68,8 @@ public class AnnouncementController {
 
         return "redirect:/announcements";
     }
-
+    // ── UPDATE: Show form ─────────────────────────────────
+    // GET /Announcements/edit/{id}
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model,
                                RedirectAttributes redirectAttributes) {
@@ -81,6 +85,8 @@ public class AnnouncementController {
         });
     }
 
+    // ── UPDATE: Submit form ───────────────────────────────
+    // POST /announcements/edit/{id}
     @PostMapping("/edit/{id}")
     public String updateAnnouncement(@PathVariable Long id,
                                      @Valid @ModelAttribute("announcement") Announcement announcement,
@@ -106,7 +112,8 @@ public class AnnouncementController {
 
         return "redirect:/announcements";
     }
-
+ // ── DELETE ────────────────────────────────────────────
+    // GET /announcements/delete/{id}
     @GetMapping("/delete/{id}")
     public String deleteAnnouncement(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         logger.debug("AnnouncementController.deleteAnnouncement() - id={}", id);

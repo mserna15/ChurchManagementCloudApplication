@@ -26,14 +26,16 @@ public class EventController {
 
     @Autowired
     private EventService eventService;
-
+    // ── READ: List all Events ────────────────────────────
+    // GET /Events
     @GetMapping
     public String listEvents(Model model) {
         logger.debug("EventController.listEvents() - Request received");
         model.addAttribute("events", eventService.getAllEvents());
         return "events/list";
     }
-
+    // ── CREATE: Show form ─────────────────────────────────
+    // GET /Events/add
     @GetMapping("/add")
     public String showAddForm(Model model) {
         logger.debug("EventController.showAddForm() - Request received");
@@ -41,6 +43,8 @@ public class EventController {
         return "events/form";
     }
 
+      // ── CREATE: Submit form ───────────────────────────────
+    // POST /Events/add
     @PostMapping("/add")
     public String addEvent(@Valid @ModelAttribute("event") Event event,
                            BindingResult result,
@@ -65,7 +69,8 @@ public class EventController {
 
         return "redirect:/events";
     }
-
+    // ── UPDATE: Show form ─────────────────────────────────
+    // GET /Events/edit/{id}
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model,
                                RedirectAttributes redirectAttributes) {
@@ -81,6 +86,8 @@ public class EventController {
         });
     }
 
+    // ── UPDATE: Submit form ───────────────────────────────
+    // POST /events/edit/{id}
     @PostMapping("/edit/{id}")
     public String updateEvent(@PathVariable Long id,
                               @Valid @ModelAttribute("event") Event event,
@@ -106,7 +113,8 @@ public class EventController {
 
         return "redirect:/events";
     }
-
+ // ── DELETE ────────────────────────────────────────────
+    // GET /events/delete/{id}
     @GetMapping("/delete/{id}")
     public String deleteEvent(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         logger.debug("EventController.deleteEvent() - id={}", id);
